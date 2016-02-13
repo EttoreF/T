@@ -9,7 +9,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -62,64 +64,28 @@ public class FullscreenActivity extends Activity {
         mSystemUiHider
                 .setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
                     // Cached values.
-                    int mControlsHeight;
-                    int mShortAnimTime;
 
                     @Override
                     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
                     public void onVisibilityChange(boolean visible) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-                            // If the ViewPropertyAnimator API is available
-                            // (Honeycomb MR2 and later), use it to animate the
-                            // in-layout UI controls at the bottom of the
-                            // screen.
-                            if (mControlsHeight == 0) {
-                                mControlsHeight = controlsView.getHeight();
-                            }
-                            if (mShortAnimTime == 0) {
-                                mShortAnimTime = getResources().getInteger(
-                                        android.R.integer.config_shortAnimTime);
-                            }
-                            controlsView.animate()
-                                    .translationY(visible ? 0 : mControlsHeight)
-                                    .setDuration(mShortAnimTime);
-                        } else {
-                            // If the ViewPropertyAnimator APIs aren't
-                            // available, simply show or hide the in-layout UI
-                            // controls.
-                            controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
-                        }
 
-                        if (visible && AUTO_HIDE) {
-                            // Schedule a hide().
-                            delayedHide(AUTO_HIDE_DELAY_MILLIS);
-                        }
+
                     }
                 });
 
-        // Set up the user interaction to manually show or hide the system UI.
-        contentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (TOGGLE_ON_CLICK) {
-                    mSystemUiHider.toggle();
-                } else {
-                    mSystemUiHider.show();
-                }
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
+    /**
     public void buttonOnClick(View v) {
 // do something when the button is clicked
         Button button = (Button) v;
         ((Button) v).setText("clicked");
     }
+**/
 
+    long lastDown = 0L;
+    long lastDuration = 0L;
+    int timeToPress = randomWithRange(4,10);
+    int correctGuesses = 0;
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -128,6 +94,55 @@ public class FullscreenActivity extends Activity {
         // created, to briefly hint to the user that UI controls
         // are available.
         delayedHide(100);
+
+        TextView score = (TextView) findViewById(R.id.textView);
+        Button next = (Button) findViewById(R.id.button);
+        next.setText(""+timeToPress);
+        score.setText(""+correctGuesses);
+        next.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    lastDown = System.currentTimeMillis();
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    lastDuration = System.currentTimeMillis() - lastDown;
+                    if(pressedWithinRange(lastDuration, timeToPress)){
+                        makeNewTime();
+                        correctGuesses++;
+                        TextView score = (TextView) findViewById(R.id.textView);
+                        score.setText(""+correctGuesses);
+                    }
+                    else{
+                        makeNewTime();
+                        correctGuesses = 0;
+                        TextView score = (TextView) findViewById(R.id.textView);
+                        score.setText(""+correctGuesses);
+                    }
+                }
+                return true;
+            }
+
+        });
+    }
+
+    public void makeNewTime(){
+        Button next = (Button) findViewById(R.id.button);
+        timeToPress = randomWithRange(4,10);
+        next.setText(""+timeToPress);
+    }
+
+    int randomWithRange(int min, int max)
+    {
+        int range = (max - min) + 1;
+        return (int)(Math.random() * range) + min;
+    }
+
+    boolean pressedWithinRange(long duration, int timeToPress){
+        long milliTTP = (long) timeToPress*1000;
+        if(duration > milliTTP-milliTTP*.25 && duration < milliTTP){
+            return true;
+        }
+        return false;
     }
 
 

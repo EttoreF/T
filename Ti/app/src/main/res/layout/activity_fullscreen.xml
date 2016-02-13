@@ -1,7 +1,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:background="#0099cc"
-    tools:context=".FullscreenActivity">
+    tools:context=".FullscreenActivity"
+    android:longClickable="true">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -9,7 +10,7 @@
     <TextView android:id="@+id/fullscreen_content" android:layout_width="match_parent"
         android:layout_height="match_parent" android:keepScreenOn="true" android:textColor="#33b5e5"
         android:textStyle="bold" android:textSize="50sp" android:gravity="center"
-        android:text="@string/dummy_content" />
+        android:text="" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -35,8 +36,16 @@
             android:text="New Button"
             android:id="@+id/button"
             android:layout_gravity="center"
-            android:onClick="buttonOnClick"
             android:longClickable="true" />
+
+        <TextView
+            android:layout_width="204dp"
+            android:textSize="50sp"
+            android:layout_height="115dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text=""
+            android:id="@+id/textView"
+            android:layout_gravity="center_horizontal|top" />
 
     </FrameLayout>
 
